@@ -7,7 +7,7 @@ import { PieChart, Pie, Cell, LabelList } from "recharts";
 const App = () => {
   const [csvData, setCsvData] = useState<DemoDataRow[]>([]);
   const [pieData, setPieData] = useState<PieDataRow[]>([]);
-  const csvFileUrl = "/data/demo.csv"; // FIX ME
+  const csvFileUrl = "/data/Deer Crashes.csv"; // FIX ME
 
   const getData = async () => {
     let response = await fetch(csvFileUrl);
@@ -26,10 +26,10 @@ const App = () => {
     let newPieCounts: { [key: string]: number } = {};
     let newPieData: PieDataRow[] = [];
     csvData.forEach((row) => {
-      if (!newPieCounts[row["Favorite Sport"]]) {
-        newPieCounts[row["Favorite Sport"]] = 0; // initialize if not there...
+      if (!newPieCounts[row["Weather Conditions"]]) {
+        newPieCounts[row["Weather Conditions"]] = 0; // initialize if not there...
       }
-      newPieCounts[row["Favorite Sport"]]++; // Add one!
+      newPieCounts[row["Weather Conditions"]]++; // Add one!
     });
     for (let key in newPieCounts) {
       newPieData.push({ name: key, value: newPieCounts[key] });
@@ -42,7 +42,7 @@ const App = () => {
     <main style={{ maxWidth: 800, margin: "auto" }}>
       <h1>Hello Data Visualization</h1>
       <p>Loaded {csvData.length} rows of CSV Data!</p>
-      <h2>Favorite Sport:</h2>
+      <h2>Risk of Certain Weather Conditions</h2>
       <PieChart width={300} height={300}>
         <Pie data={pieData} dataKey="value" nameKey="name" label fill="yellow">
           <LabelList dataKey="name" position="middle" />
@@ -53,8 +53,8 @@ const App = () => {
       </PieChart>
       {csvData.map((row, idx) => (
         <div key={idx}>
-          {row.Name} age {row.Age}'s favorite color is {row["Favorite Color"]}{" "}
-          and they play {row["Favorite Sport"]}
+          {row.Name} age {row.Age}'s favorite color is {row["Weather Conditions"]}{" "}
+          and they play {row["Weather Conditions"]}
         </div>
       ))}
     </main>
