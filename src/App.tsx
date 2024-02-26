@@ -1,20 +1,30 @@
 import { useEffect, useState } from "react";
 import papa from "papaparse";
 import "./App.css";
-import type { DemoDataRow, PieDataRow } from "./types";
-import { PieChart, Pie, Cell, LabelList } from "recharts";
+import {
+  DeerDataRow,
+  PieDataRow,
+  BarDataRow,
+  clearList,
+  rainList,
+  fogList,
+  snowList,
+} from "./types";
+import { PieChart, Pie, Cell, LabelList, BarChart, Bar } from "recharts";
 
 const App = () => {
-  const [csvData, setCsvData] = useState<DemoDataRow[]>([]);
+  const [csvData, setCsvData] = useState<DeerDataRow[]>([]);
   const [pieData, setPieData] = useState<PieDataRow[]>([]);
+  const [barData, setBarData] = useState<BarDataRow[]>([]);
+
   const csvFileUrl = "/data/Deer Crashes.csv"; // FIX ME
 
   const getData = async () => {
     let response = await fetch(csvFileUrl);
     let text = await response.text();
-    let parsed = await papa.parse<DemoDataRow>(text, { header: true });
+    let parsed = await papa.parse<DeerDataRow>(text, { header: true });
     console.log("Successfully parsed data:", parsed); // Log to make it easy to inspect shape of our data in the inspector
-    setCsvData(parsed.data.filter((row) => row.Name)); // Only keep rows that have a name, so we avoid blank row at end of file
+    setCsvData(parsed.data.filter((row) => row["Weather Conditions"])); // Only keep rows that have a name, so we avoid blank row at end of file
   };
 
   useEffect(() => {
@@ -22,20 +32,34 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // Update whenever data changes...
-    let newPieCounts: { [key: string]: number } = {};
-    let newPieData: PieDataRow[] = [];
+    let barData = {
+      Clear: 0,
+      Rainy: 0,
+      Foggy: 0,
+      Snowy: 0,
+    };
+
     csvData.forEach((row) => {
-      if (!newPieCounts[row["Weather Conditions"]]) {
-        newPieCounts[row["Weather Conditions"]] = 0; // initialize if not there...
+      if (clearList.includes(row["Weather Conditions"])) {
+        barData.Clear += 1;
+      } else if (rainList.includes(row["Weather Conditions"])) {
+        barData.Rainy += 1;
+      } else if (fogList.includes(row["Weather Conditions"])) {
+        barData.Foggy += 1;
+      } else if (snowList.includes(row["Weather Conditions"])) {
+        barData.Snowy += 1;
       }
-      newPieCounts[row["Weather Conditions"]]++; // Add one!
     });
-    for (let key in newPieCounts) {
-      newPieData.push({ name: key, value: newPieCounts[key] });
+    let newBarData: BarDataRow[] = [];
+    for (let key in barData) {
+      newBarData.push({
+        name: key,
+        // @ts-ignore
+        value: barData[key],
+      });
     }
-    setPieData(newPieData);
-    console.log("Set new pie data!", newPieData);
+    console.log("Updated data for bar chaart", newBarData);
+    setBarData(newBarData);
   }, [csvData]);
 
   return (
@@ -43,20 +67,14 @@ const App = () => {
       <h1>Hello Data Visualization</h1>
       <p>Loaded {csvData.length} rows of CSV Data!</p>
       <h2>Risk of Certain Weather Conditions</h2>
-      <PieChart width={300} height={300}>
-        <Pie data={pieData} dataKey="value" nameKey="name" label fill="yellow">
+      <BarChart width={300} height={300}>
+        <Bar data={barData} dataKey="value" nameKey="name" label fill="yellow">
           <LabelList dataKey="name" position="middle" />
-          {pieData.map((entry) => (
+          {barData.map((entry) => (
             <Cell key={entry.name} fill={entry.name.toLowerCase()} />
           ))}
-        </Pie>
-      </PieChart>
-      {csvData.map((row, idx) => (
-        <div key={idx}>
-          {row.Name} age {row.Age}'s favorite color is {row["Weather Conditions"]}{" "}
-          and they play {row["Weather Conditions"]}
-        </div>
-      ))}
+        </Bar>
+      </BarChart>
     </main>
   );
 };
