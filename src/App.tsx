@@ -10,12 +10,26 @@ import {
   fogList,
   snowList,
 } from "./types";
-import { PieChart, Pie, Cell, LabelList, BarChart, Bar } from "recharts";
+import {
+  LineChart,
+  PieChart,
+  Pie,
+  Cell,
+  LabelList,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  YAxis,
+  XAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 const App = () => {
   const [csvData, setCsvData] = useState<DeerDataRow[]>([]);
   const [pieData, setPieData] = useState<PieDataRow[]>([]);
   const [barData, setBarData] = useState<BarDataRow[]>([]);
+  const [graphData, setGraphData] = useState<GraphDataRow[]>([]);
 
   const csvFileUrl = "/data/Deer Crashes.csv"; // FIX ME
 
@@ -50,30 +64,49 @@ const App = () => {
         barData.Snowy += 1;
       }
     });
+    barData.Clear = barData.Clear / 1960;
+    barData.Rainy = barData.Rainy / 648;
+    barData.Foggy = barData.Foggy / 136;
+    barData.Snowy = barData.Snowy / 184;
     let newBarData: BarDataRow[] = [];
     for (let key in barData) {
       newBarData.push({
         name: key,
         // @ts-ignore
-        value: barData[key],
+        crashes: barData[key],
       });
     }
-    console.log("Updated data for bar chaart", newBarData);
+    console.log("Updated data for bar chart", newBarData);
     setBarData(newBarData);
   }, [csvData]);
 
+  function timeStringToHour(timeString: string): number {
+    const [hour, minute, ampm] = timeString.split(/[: ]/g);
+    let timeNum = Number(hour);
+    if (ampm == "AM") {
+      if (timeNum == 12) {
+        timeNum = 0;
+      }
+    } else if (ampm == "PM") {
+      if (timeNum != 12) {
+        timeNum += 12;
+      }
+    }
+    return timeNum;
+  }
+  console.log("1:56 PM to 24 hour time:", timeStringToHour("1:56 PM"));
   return (
     <main style={{ maxWidth: 800, margin: "auto" }}>
       <h1>Hello Data Visualization</h1>
       <p>Loaded {csvData.length} rows of CSV Data!</p>
       <h2>Risk of Certain Weather Conditions</h2>
-      <BarChart width={300} height={300}>
-        <Bar data={barData} dataKey="value" nameKey="name" label fill="yellow">
-          <LabelList dataKey="name" position="middle" />
-          {barData.map((entry) => (
-            <Cell key={entry.name} fill={entry.name.toLowerCase()} />
-          ))}
-        </Bar>
+      <BarChart width={730} height={250} data={barData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="crashes" fill="#42033D" />
       </BarChart>
     </main>
   );
