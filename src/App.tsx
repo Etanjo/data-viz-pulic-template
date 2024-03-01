@@ -5,6 +5,7 @@ import {
   DeerDataRow,
   PieDataRow,
   BarDataRow,
+  GraphDataRow,
   clearList,
   rainList,
   fogList,
@@ -23,6 +24,7 @@ import {
   XAxis,
   Tooltip,
   Legend,
+  Line,
 } from "recharts";
 
 const App = () => {
@@ -31,12 +33,17 @@ const App = () => {
   const [barData, setBarData] = useState<BarDataRow[]>([]);
   const [graphData, setGraphData] = useState<GraphDataRow[]>([]);
 
-  const csvFileUrl = "/data/Deer Crashes.csv"; // FIX ME
+  const csvFileUrl = "/data/Deer Crashes.csv";
 
   const getData = async () => {
     let response = await fetch(csvFileUrl);
     let text = await response.text();
     let parsed = await papa.parse<DeerDataRow>(text, { header: true });
+    parsed.data.forEach((row) => {
+      if (row["Crash Time"]) {
+        row.Hour = timeStringToHour(row["Crash Time"]);
+      }
+    });
     console.log("Successfully parsed data:", parsed); // Log to make it easy to inspect shape of our data in the inspector
     setCsvData(parsed.data.filter((row) => row["Weather Conditions"])); // Only keep rows that have a name, so we avoid blank row at end of file
   };
@@ -44,6 +51,22 @@ const App = () => {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    let newLineGraph: { [key: string]: number } = {};
+    let newLineData: GraphDataRow[] = [];
+    csvData.forEach((row) => {
+      if (!newLineGraph[row["Hour"]]) {
+        newLineGraph[row["Hour"]] = 0; // initialize if not there...
+      }
+      newLineGraph[row["Hour"]]++; // Add one!
+    });
+    for (let key in newLineGraph) {
+      newLineData.push({ name: key, crashes: newLineGraph[key] });
+    }
+    setGraphData(newLineData.slice(0, 24));
+    console.log("Set new Line data!", newLineData);
+  }, [csvData]);
 
   useEffect(() => {
     let barData = {
@@ -106,8 +129,36 @@ const App = () => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="crashes" fill="#42033D" />
+        <Bar name="Crashes per Day" dataKey="crashes" fill="#42033D" />
       </BarChart>
+      <LineChart
+        width={730}
+        height={500}
+        data={graphData}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          //label={{ value: "Hour of Day", position: "start" }}
+          dataKey="name"
+        />
+        <YAxis
+          /*label={{
+            value: "Number of Crashes",
+            angle: "-90",
+            position: "start",
+          }}*/
+          dataKey="crashes"
+        />
+        <Tooltip />
+        <Legend />
+        <Line
+          name="#Crashes per Hour of Day"
+          type="monotone"
+          dataKey="crashes"
+          stroke="#8884d8"
+        />
+      </LineChart>
     </main>
   );
 };

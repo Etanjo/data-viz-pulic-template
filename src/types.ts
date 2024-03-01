@@ -1,7 +1,7 @@
 export type DeerDataRow = {
-  Name: string;
-  Age: string;
   "Weather Conditions": string;
+  Hour: number;
+  "Crash Time": string;
 };
 
 export type PieDataRow = {
@@ -17,7 +17,17 @@ export type GraphDataRow = {
   crashes: number;
 };
 
-export let clearList = ['Clear', 'Clear/Clear', 'Clear/Other', 'Cloudy', 'Severe Crosswinds', 'Severe Crosswinds/Clear', 'Clear/Severe Crosswinds', 'Cloudy/Clear', 'Cloudy/Cloudy'];
+export let clearList = [
+  "Clear",
+  "Clear/Clear",
+  "Clear/Other",
+  "Cloudy",
+  "Severe Crosswinds",
+  "Severe Crosswinds/Clear",
+  "Clear/Severe Crosswinds",
+  "Cloudy/Clear",
+  "Cloudy/Cloudy",
+];
 export let rainList = [
   "Rain",
   "Cloudy/Rain",
