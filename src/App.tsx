@@ -120,9 +120,8 @@ const App = () => {
   console.log("1:56 PM to 24 hour time:", timeStringToHour("1:56 PM"));
   return (
     <main style={{ maxWidth: 800, margin: "auto" }}>
-      <h1>Hello Data Visualization</h1>
-      <p>Loaded {csvData.length} rows of CSV Data!</p>
-      <h2>Risk of Certain Weather Conditions</h2>
+      <h1>Deer Crash Data Visualization</h1>
+      <h2>Average Deer Crashes per Day in Different Weather Conditions Over Past 8 Years</h2>
       <BarChart width={730} height={250} data={barData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
@@ -131,6 +130,7 @@ const App = () => {
         <Legend />
         <Bar name="Crashes per Day" dataKey="crashes" fill="#42033D" />
       </BarChart>
+     <h2>Total Deer Crashes per Hour Over Past 8 Years</h2>
       <LineChart
         width={730}
         height={500}
@@ -159,6 +159,8 @@ const App = () => {
           stroke="#8884d8"
         />
       </LineChart>
+      <h3>Data Source:</h3>
+      <a href="https://apps.impact.dot.state.ma.us/cdv/">Source Data</a>
     </main>
   );
 };
